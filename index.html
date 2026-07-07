@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Mimi's 3D Print Shop</title>
+<style>
+  :root{
+    --pink:#ff5da2;
+    --purple:#7c5cff;
+    --blue:#3aa0ff;
+    --yellow:#ffc73a;
+    --green:#3ad685;
+    --bg:#fdf6ff;
+    --ink:#2b2140;
+    --card:#ffffff;
+    --shadow: 0 6px 0 rgba(43,33,64,0.15);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background:
+      radial-gradient(circle at 10% 10%, #ffe9f5 0, transparent 40%),
+      radial-gradient(circle at 90% 20%, #e6f0ff 0, transparent 40%),
+      radial-gradient(circle at 50% 90%, #eafff2 0, transparent 40%),
+      var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    padding-bottom:120px;
+  }
+  header{
+    text-align:center;
+    padding:28px 16px 12px;
+  }
+  header h1{
+    margin:0;
+    font-size:2rem;
+    background:linear-gradient(90deg, var(--pink), var(--purple), var(--blue));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    font-weight:900;
+  }
+  header p{
+    margin:6px 0 0;
+    color:#6b5f85;
+    font-size:0.95rem;
+  }
+  main{
+    max-width:900px;
+    margin:0 auto;
+    padding:0 16px;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
+    gap:14px;
+    margin-top:18px;
+  }
+  .item-card{
+    background:var(--card);
+    border-radius:18px;
+    box-shadow:var(--shadow);
+    border:3px solid transparent;
+    padding:14px 10px 12px;
+    text-align:center;
+    cursor:pointer;
+    transition:transform .12s ease, border-color .12s ease;
+    user-select:none;
+  }
+  .item-card:hover{ transform:translateY(-3px); }
+  .item-card:active{ transform:translateY(1px); box-shadow:0 2px 0 rgba(43,33,64,0.15); }
+  .item-card.selected{ border-color:var(--purple); }
+  .item-emoji{
+    font-size:2.6rem;
+    line-height:1;
+    display:block;
+  }
+  .item-name{
+    font-weight:800;
+    margin-top:8px;
+    font-size:0.95rem;
+  }
+  .item-blurb{
+    font-size:0.75rem;
+    color:#8a7fa3;
+    margin-top:2px;
+  }
+  .section-title{
+    margin:26px 0 4px;
+    font-size:1.2rem;
+    font-weight:900;
+    color:var(--purple);
+  }
+  .colors{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:12px;
+  }
+  .swatch{
+    width:46px;
+    height:46px;
+    border-radius:50%;
+    border:3px solid white;
+    box-shadow:0 0 0 2px #e2d9f5, 0 4px 0 rgba(43,33,64,0.1);
+    cursor:pointer;
+    position:relative;
+  }
+  .swatch.selected{
+    box-shadow:0 0 0 3px var(--purple), 0 4px 0 rgba(43,33,64,0.1);
+    transform:scale(1.08);
+  }
+  .swatch-label{
+    text-align:center;
+    font-size:0.65rem;
+    margin-top:4px;
+    color:#6b5f85;
+    width:46px;
+  }
+  .swatch-wrap{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .add-btn{
+    display:block;
+    margin:20px auto 0;
+    background:linear-gradient(90deg, var(--pink), var(--purple));
+    color:white;
+    border:none;
+    border-radius:999px;
+    padding:14px 34px;
+    font-size:1.05rem;
+    font-weight:800;
+    box-shadow:0 5px 0 #5a3fc0;
+    cursor:pointer;
+  }
+  .add-btn:active{ transform:translateY(3px); box-shadow:0 2px 0 #5a3fc0; }
+  .add-btn:disabled{
+    background:#d8d0e8;
+    box-shadow:0 5px 0 #b6acce;
+    cursor:not-allowed;
+  }
+  .empty-hint{
+    text-align:center;
+    color:#a99bc7;
+    font-size:0.85rem;
+    margin-top:10px;
+  }
+  .cart{
+    background:var(--card);
+    border-radius:18px;
+    box-shadow:var(--shadow);
+    padding:14px 16px;
+    margin-top:14px;
+  }
+  .cart-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:8px 0;
+    border-bottom:1px dashed #eee2fb;
+  }
+  .cart-row:last-child{ border-bottom:none; }
+  .cart-emoji{ font-size:1.6rem; }
+  .cart-swatch{
+    width:20px; height:20px; border-radius:50%;
+    border:2px solid white;
+    box-shadow:0 0 0 1.5px #e2d9f5;
+    flex-shrink:0;
+  }
+  .cart-text{ flex:1; font-weight:700; font-size:0.9rem; }
+  .cart-color-name{ font-weight:400; color:#8a7fa3; font-size:0.8rem; }
+  .remove-btn{
+    background:none;
+    border:none;
+    color:#c9407a;
+    font-size:1.3rem;
+    cursor:pointer;
+    line-height:1;
+    padding:4px 8px;
+  }
+  textarea{
+    width:100%;
+    margin-top:12px;
+    border:2px solid #eee2fb;
+    border-radius:14px;
+    padding:12px;
+    font-size:0.95rem;
+    font-family:inherit;
+    resize:vertical;
+    min-height:60px;
+  }
+  textarea:focus{ outline:none; border-color:var(--purple); }
+  .send-bar{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    background:white;
+    box-shadow:0 -4px 20px rgba(43,33,64,0.12);
+    padding:14px 16px;
+    display:flex;
+    justify-content:center;
+  }
+  .send-btn{
+    width:100%;
+    max-width:420px;
+    background:linear-gradient(90deg, var(--green), var(--blue));
+    color:white;
+    border:none;
+    border-radius:999px;
+    padding:16px;
+    font-size:1.1rem;
+    font-weight:900;
+    box-shadow:0 5px 0 #1f7a9c;
+    cursor:pointer;
+  }
+  .send-btn:active{ transform:translateY(3px); box-shadow:0 2px 0 #1f7a9c; }
+  .send-btn:disabled{
+    background:#d8d0e8;
+    box-shadow:0 5px 0 #b6acce;
+    cursor:not-allowed;
+  }
+  .toast{
+    position:fixed;
+    top:20px;
+    left:50%;
+    transform:translateX(-50%) translateY(-20px);
+    background:var(--ink);
+    color:white;
+    padding:12px 20px;
+    border-radius:12px;
+    font-size:0.9rem;
+    opacity:0;
+    transition:opacity .2s ease, transform .2s ease;
+    pointer-events:none;
+    z-index:50;
+    max-width:80vw;
+    text-align:center;
+  }
+  .toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Mimi's 3D Print Shop 🖨️✨</h1>
+  <p>Pick your prints, pick your colors, send the order!</p>
+</header>
+
+<main>
+  <div class="section-title">1. Choose what to print</div>
+  <div id="grid" class="grid"></div>
+
+  <div class="section-title">2. Choose a filament color</div>
+  <div id="colors" class="colors"></div>
+  <button id="addBtn" class="add-btn" disabled>Add to Print List</button>
+  <div id="pickHint" class="empty-hint">Pick an item and a color first!</div>
+
+  <div class="section-title">3. Your print list</div>
+  <div id="cart" class="cart">
+    <div class="empty-hint" id="cartEmpty">Nothing here yet — add something above!</div>
+  </div>
+
+  <div class="section-title">4. Add a note (optional)</div>
+  <textarea id="note" placeholder="Anything Mimi should know? (e.g. 'need it by Saturday!')"></textarea>
+</main>
+
+<div class="send-bar">
+  <button id="sendBtn" class="send-btn" disabled>Send Order to Mimi 🚀</button>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+  // ---- Config: edit these to customize the app ----
+  const MIMI = { name: "Mimi", phone: "", email: "" };
+
+  const CATALOG = [
+    { id: "dragon",    emoji: "🐉", name: "Dragon",        blurb: "fierce & fiery" },
+    { id: "trex",      emoji: "🦖", name: "T-Rex",         blurb: "chomp chomp" },
+    { id: "racecar",   emoji: "🏎️", name: "Race Car",      blurb: "vroom vroom" },
+    { id: "castle",    emoji: "🏰", name: "Castle",        blurb: "with towers" },
+    { id: "robot",     emoji: "🤖", name: "Robot",         blurb: "beep boop" },
+    { id: "unicorn",   emoji: "🦄", name: "Unicorn",       blurb: "magical" },
+    { id: "rocket",    emoji: "🚀", name: "Rocket Ship",   blurb: "to the moon" },
+    { id: "shark",     emoji: "🦈", name: "Shark",         blurb: "chomp!" },
+    { id: "guitar",    emoji: "🎸", name: "Mini Guitar",   blurb: "rock on" },
+    { id: "dino2",     emoji: "🦕", name: "Long-Neck Dino",blurb: "gentle giant" },
+    { id: "octopus",   emoji: "🐙", name: "Octopus",       blurb: "8 arms!" },
+    { id: "chess",     emoji: "♟️", name: "Chess Piece",   blurb: "game time" },
+  ];
+
+  const COLORS = [
+    { id: "red",     name: "Red",     hex: "#ef4444" },
+    { id: "orange",  name: "Orange",  hex: "#f97316" },
+    { id: "yellow",  name: "Yellow",  hex: "#facc15" },
+    { id: "green",   name: "Green",   hex: "#22c55e" },
+    { id: "blue",    name: "Blue",    hex: "#3b82f6" },
+    { id: "purple",  name: "Purple",  hex: "#a855f7" },
+    { id: "pink",    name: "Pink",    hex: "#ec4899" },
+    { id: "black",   name: "Black",   hex: "#1f2937" },
+    { id: "white",   name: "White",   hex: "#f9fafb" },
+    { id: "silver",  name: "Silver",  hex: "#9ca3af" },
+    { id: "gold",    name: "Gold",    hex: "#d4af37" },
+    { id: "glow",    name: "Glow-in-Dark", hex: "#bef264" },
+  ];
+
+  // ---- State (in-memory only, nothing persisted) ----
+  let selectedItem = null;
+  let selectedColor = null;
+  let cart = [];
+
+  const gridEl = document.getElementById("grid");
+  const colorsEl = document.getElementById("colors");
+  const addBtn = document.getElementById("addBtn");
+  const pickHint = document.getElementById("pickHint");
+  const cartEl = document.getElementById("cart");
+  const cartEmpty = document.getElementById("cartEmpty");
+  const sendBtn = document.getElementById("sendBtn");
+  const noteEl = document.getElementById("note");
+  const toastEl = document.getElementById("toast");
+
+  function renderGrid(){
+    gridEl.innerHTML = "";
+    CATALOG.forEach(item => {
+      const card = document.createElement("div");
+      card.className = "item-card" + (selectedItem === item.id ? " selected" : "");
+      card.innerHTML = `
+        <span class="item-emoji">${item.emoji}</span>
+        <div class="item-name">${item.name}</div>
+        <div class="item-blurb">${item.blurb}</div>
+      `;
+      card.addEventListener("click", () => {
+        selectedItem = item.id;
+        renderGrid();
+        updateAddState();
+      });
+      gridEl.appendChild(card);
+    });
+  }
+
+  function renderColors(){
+    colorsEl.innerHTML = "";
+    COLORS.forEach(color => {
+      const wrap = document.createElement("div");
+      wrap.className = "swatch-wrap";
+      const sw = document.createElement("div");
+      sw.className = "swatch" + (selectedColor === color.id ? " selected" : "");
+      sw.style.background = color.hex;
+      sw.addEventListener("click", () => {
+        selectedColor = color.id;
+        renderColors();
+        updateAddState();
+      });
+      const label = document.createElement("div");
+      label.className = "swatch-label";
+      label.textContent = color.name;
+      wrap.appendChild(sw);
+      wrap.appendChild(label);
+      colorsEl.appendChild(wrap);
+    });
+  }
+
+  function updateAddState(){
+    const ready = selectedItem && selectedColor;
+    addBtn.disabled = !ready;
+    pickHint.style.display = ready ? "none" : "block";
+  }
+
+  addBtn.addEventListener("click", () => {
+    const item = CATALOG.find(i => i.id === selectedItem);
+    const color = COLORS.find(c => c.id === selectedColor);
+    cart.push({ item, color });
+    selectedItem = null;
+    selectedColor = null;
+    renderGrid();
+    renderColors();
+    updateAddState();
+    renderCart();
+    showToast(`Added ${item.name} in ${color.name}!`);
+  });
+
+  function renderCart(){
+    cartEl.innerHTML = "";
+    if (cart.length === 0){
+      cartEl.appendChild(cartEmpty);
+      sendBtn.disabled = true;
+      return;
+    }
+    cart.forEach((entry, idx) => {
+      const row = document.createElement("div");
+      row.className = "cart-row";
+      row.innerHTML = `
+        <span class="cart-emoji">${entry.item.emoji}</span>
+        <span class="cart-swatch" style="background:${entry.color.hex}"></span>
+        <span class="cart-text">${entry.item.name} <span class="cart-color-name">— ${entry.color.name}</span></span>
+      `;
+      const removeBtn = document.createElement("button");
+      removeBtn.className = "remove-btn";
+      removeBtn.textContent = "✕";
+      removeBtn.addEventListener("click", () => {
+        cart.splice(idx, 1);
+        renderCart();
+      });
+      row.appendChild(removeBtn);
+      cartEl.appendChild(row);
+    });
+    sendBtn.disabled = false;
+  }
+
+  function buildOrderText(){
+    const lines = cart.map(e => `• ${e.item.name} (${e.color.name})`);
+    let text = `Hi ${MIMI.name}! Here's my 3D print order:\n\n${lines.join("\n")}`;
+    const note = noteEl.value.trim();
+    if (note){
+      text += `\n\nNote: ${note}`;
+    }
+    return text;
+  }
+
+  function showToast(msg, duration = 2200){
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => toastEl.classList.remove("show"), duration);
+  }
+
+  async function sendOrder(){
+    const text = buildOrderText();
+
+    if (navigator.share){
+      try {
+        await navigator.share({ title: "3D Print Order", text });
+        return;
+      } catch (err) {
+        // user cancelled or share failed — fall through to next option
+      }
+    }
+
+    if (MIMI.phone){
+      window.location.href = `sms:${MIMI.phone}?&body=${encodeURIComponent(text)}`;
+      return;
+    }
+
+    if (MIMI.email){
+      window.location.href = `mailto:${MIMI.email}?subject=${encodeURIComponent("3D Print Order")}&body=${encodeURIComponent(text)}`;
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast("Copied! Paste it into a text or email to " + MIMI.name + ".", 3500);
+    } catch (err) {
+      showToast("Couldn't share automatically — copy the list and send it yourself!", 3500);
+    }
+  }
+
+  sendBtn.addEventListener("click", sendOrder);
+
+  renderGrid();
+  renderColors();
+  updateAddState();
+  renderCart();
+</script>
+
+</body>
+</html>
