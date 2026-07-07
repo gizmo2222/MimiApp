@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7c5cff">
 <title>Mimi's 3D Print Shop</title>
 <style>
   :root{
@@ -17,6 +18,7 @@
     --shadow: 0 6px 0 rgba(43,33,64,0.15);
   }
   *{box-sizing:border-box;}
+  html{ -webkit-text-size-adjust:100%; }
   body{
     margin:0;
     font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -27,15 +29,16 @@
       var(--bg);
     color:var(--ink);
     min-height:100vh;
-    padding-bottom:120px;
+    padding-bottom:calc(110px + env(safe-area-inset-bottom));
   }
+  button{ -webkit-tap-highlight-color:transparent; touch-action:manipulation; font-family:inherit; }
   header{
     text-align:center;
-    padding:28px 16px 12px;
+    padding:calc(20px + env(safe-area-inset-top)) 16px 10px;
   }
   header h1{
     margin:0;
-    font-size:2rem;
+    font-size:clamp(1.5rem, 6vw, 2rem);
     background:linear-gradient(90deg, var(--pink), var(--purple), var(--blue));
     -webkit-background-clip:text;
     background-clip:text;
@@ -45,103 +48,111 @@
   header p{
     margin:6px 0 0;
     color:#6b5f85;
-    font-size:0.95rem;
+    font-size:0.9rem;
   }
   main{
     max-width:900px;
     margin:0 auto;
-    padding:0 16px;
+    padding:0 12px;
   }
   .grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
-    gap:14px;
-    margin-top:18px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin-top:16px;
+  }
+  @media (min-width:640px){
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));
+      align-items:start;
+    }
   }
   .item-card{
     background:var(--card);
     border-radius:18px;
     box-shadow:var(--shadow);
     border:3px solid transparent;
-    padding:14px 10px 12px;
-    text-align:center;
-    cursor:pointer;
-    transition:transform .12s ease, border-color .12s ease;
-    user-select:none;
+    padding:14px;
+    transition:border-color .15s ease;
   }
-  .item-card:hover{ transform:translateY(-3px); }
-  .item-card:active{ transform:translateY(1px); box-shadow:0 2px 0 rgba(43,33,64,0.15); }
-  .item-card.selected{ border-color:var(--purple); }
+  .item-top{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
   .item-emoji{
-    font-size:2.6rem;
+    font-size:2.4rem;
     line-height:1;
-    display:block;
+    flex-shrink:0;
   }
   .item-name{
     font-weight:800;
-    margin-top:8px;
-    font-size:0.95rem;
+    font-size:1.02rem;
   }
   .item-blurb{
-    font-size:0.75rem;
+    font-size:0.8rem;
     color:#8a7fa3;
-    margin-top:2px;
+    margin-top:1px;
   }
   .section-title{
-    margin:26px 0 4px;
-    font-size:1.2rem;
+    margin:24px 0 4px;
+    font-size:1.15rem;
     font-weight:900;
     color:var(--purple);
   }
-  .colors{
+  .item-colors{
     display:flex;
     flex-wrap:wrap;
-    gap:10px;
-    margin-top:12px;
+    margin:6px -6px -6px;
   }
-  .swatch{
-    width:46px;
-    height:46px;
-    border-radius:50%;
-    border:3px solid white;
-    box-shadow:0 0 0 2px #e2d9f5, 0 4px 0 rgba(43,33,64,0.1);
-    cursor:pointer;
-    position:relative;
-  }
-  .swatch.selected{
-    box-shadow:0 0 0 3px var(--purple), 0 4px 0 rgba(43,33,64,0.1);
-    transform:scale(1.08);
-  }
-  .swatch-label{
-    text-align:center;
-    font-size:0.65rem;
-    margin-top:4px;
-    color:#6b5f85;
-    width:46px;
-  }
-  .swatch-wrap{
+  .swatch-btn{
+    width:44px;
+    height:44px;
+    border:none;
+    background:none;
     display:flex;
-    flex-direction:column;
     align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    padding:0;
   }
-  .add-btn{
+  .swatch-btn .dot{
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    border:2px solid white;
+    box-shadow:0 0 0 1.5px #e2d9f5;
+    transition:transform .1s ease, box-shadow .1s ease;
+  }
+  .swatch-btn.selected .dot{
+    box-shadow:0 0 0 3px var(--purple);
+    transform:scale(1.15);
+  }
+  .swatch-btn:active .dot{ transform:scale(0.92); }
+  .item-add-btn{
     display:block;
-    margin:20px auto 0;
+    width:100%;
+    margin-top:8px;
     background:linear-gradient(90deg, var(--pink), var(--purple));
     color:white;
     border:none;
     border-radius:999px;
-    padding:14px 34px;
-    font-size:1.05rem;
+    min-height:46px;
+    font-size:0.95rem;
     font-weight:800;
-    box-shadow:0 5px 0 #5a3fc0;
+    box-shadow:0 4px 0 #5a3fc0;
     cursor:pointer;
   }
-  .add-btn:active{ transform:translateY(3px); box-shadow:0 2px 0 #5a3fc0; }
-  .add-btn:disabled{
+  .item-add-btn:active{ transform:translateY(2px); box-shadow:0 2px 0 #5a3fc0; }
+  .item-add-btn:disabled{
     background:#d8d0e8;
-    box-shadow:0 5px 0 #b6acce;
+    box-shadow:0 4px 0 #b6acce;
     cursor:not-allowed;
+  }
+  .item-add-btn.added{
+    background:linear-gradient(90deg, var(--green), var(--blue));
+    box-shadow:0 4px 0 #1f7a9c;
   }
   .empty-hint{
     text-align:center;
@@ -153,14 +164,15 @@
     background:var(--card);
     border-radius:18px;
     box-shadow:var(--shadow);
-    padding:14px 16px;
+    padding:6px 16px;
     margin-top:14px;
   }
+  .cart:has(.empty-hint){ padding:14px 16px; }
   .cart-row{
     display:flex;
     align-items:center;
     gap:10px;
-    padding:8px 0;
+    padding:10px 0;
     border-bottom:1px dashed #eee2fb;
   }
   .cart-row:last-child{ border-bottom:none; }
@@ -180,7 +192,8 @@
     font-size:1.3rem;
     cursor:pointer;
     line-height:1;
-    padding:4px 8px;
+    min-width:44px;
+    min-height:44px;
   }
   textarea{
     width:100%;
@@ -188,7 +201,7 @@
     border:2px solid #eee2fb;
     border-radius:14px;
     padding:12px;
-    font-size:0.95rem;
+    font-size:16px;
     font-family:inherit;
     resize:vertical;
     min-height:60px;
@@ -199,7 +212,7 @@
     left:0; right:0; bottom:0;
     background:white;
     box-shadow:0 -4px 20px rgba(43,33,64,0.12);
-    padding:14px 16px;
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom));
     display:flex;
     justify-content:center;
   }
@@ -215,6 +228,7 @@
     font-weight:900;
     box-shadow:0 5px 0 #1f7a9c;
     cursor:pointer;
+    min-height:52px;
   }
   .send-btn:active{ transform:translateY(3px); box-shadow:0 2px 0 #1f7a9c; }
   .send-btn:disabled{
@@ -224,7 +238,7 @@
   }
   .toast{
     position:fixed;
-    top:20px;
+    top:calc(16px + env(safe-area-inset-top));
     left:50%;
     transform:translateX(-50%) translateY(-20px);
     background:var(--ink);
@@ -249,24 +263,19 @@
 
 <header>
   <h1>Mimi's 3D Print Shop 🖨️✨</h1>
-  <p>Pick your prints, pick your colors, send the order!</p>
+  <p>Pick a print, pick a color, send the order!</p>
 </header>
 
 <main>
-  <div class="section-title">1. Choose what to print</div>
+  <div class="section-title">1. Choose your prints</div>
   <div id="grid" class="grid"></div>
 
-  <div class="section-title">2. Choose a filament color</div>
-  <div id="colors" class="colors"></div>
-  <button id="addBtn" class="add-btn" disabled>Add to Print List</button>
-  <div id="pickHint" class="empty-hint">Pick an item and a color first!</div>
-
-  <div class="section-title">3. Your print list</div>
+  <div class="section-title">2. Your print list</div>
   <div id="cart" class="cart">
     <div class="empty-hint" id="cartEmpty">Nothing here yet — add something above!</div>
   </div>
 
-  <div class="section-title">4. Add a note (optional)</div>
+  <div class="section-title">3. Add a note (optional)</div>
   <textarea id="note" placeholder="Anything Mimi should know? (e.g. 'need it by Saturday!')"></textarea>
 </main>
 
@@ -311,14 +320,10 @@
   ];
 
   // ---- State (in-memory only, nothing persisted) ----
-  let selectedItem = null;
-  let selectedColor = null;
   let cart = [];
+  const cardColorSelection = {}; // itemId -> colorId, only for the card mid-pick
 
   const gridEl = document.getElementById("grid");
-  const colorsEl = document.getElementById("colors");
-  const addBtn = document.getElementById("addBtn");
-  const pickHint = document.getElementById("pickHint");
   const cartEl = document.getElementById("cart");
   const cartEmpty = document.getElementById("cartEmpty");
   const sendBtn = document.getElementById("sendBtn");
@@ -328,62 +333,61 @@
   function renderGrid(){
     gridEl.innerHTML = "";
     CATALOG.forEach(item => {
+      const selectedColorId = cardColorSelection[item.id];
+      const selectedColor = COLORS.find(c => c.id === selectedColorId);
+
       const card = document.createElement("div");
-      card.className = "item-card" + (selectedItem === item.id ? " selected" : "");
-      card.innerHTML = `
+      card.className = "item-card";
+      card.style.borderColor = selectedColor ? selectedColor.hex : "transparent";
+
+      const top = document.createElement("div");
+      top.className = "item-top";
+      top.innerHTML = `
         <span class="item-emoji">${item.emoji}</span>
-        <div class="item-name">${item.name}</div>
-        <div class="item-blurb">${item.blurb}</div>
+        <div>
+          <div class="item-name">${item.name}</div>
+          <div class="item-blurb">${item.blurb}</div>
+        </div>
       `;
-      card.addEventListener("click", () => {
-        selectedItem = item.id;
-        renderGrid();
-        updateAddState();
+      card.appendChild(top);
+
+      const colorsRow = document.createElement("div");
+      colorsRow.className = "item-colors";
+      COLORS.forEach(color => {
+        const swatch = document.createElement("button");
+        swatch.type = "button";
+        swatch.className = "swatch-btn" + (selectedColorId === color.id ? " selected" : "");
+        swatch.setAttribute("aria-label", color.name);
+        swatch.innerHTML = `<span class="dot" style="background:${color.hex}"></span>`;
+        swatch.addEventListener("click", () => {
+          cardColorSelection[item.id] = color.id;
+          renderGrid();
+        });
+        colorsRow.appendChild(swatch);
       });
+      card.appendChild(colorsRow);
+
+      const addBtn = document.createElement("button");
+      addBtn.type = "button";
+      addBtn.className = "item-add-btn";
+      addBtn.textContent = "Add to Print List";
+      addBtn.disabled = !selectedColor;
+      addBtn.addEventListener("click", () => {
+        cart.push({ item, color: selectedColor });
+        renderCart();
+        addBtn.textContent = "Added! ✓";
+        addBtn.classList.add("added");
+        addBtn.disabled = true;
+        setTimeout(() => {
+          delete cardColorSelection[item.id];
+          renderGrid();
+        }, 700);
+      });
+      card.appendChild(addBtn);
+
       gridEl.appendChild(card);
     });
   }
-
-  function renderColors(){
-    colorsEl.innerHTML = "";
-    COLORS.forEach(color => {
-      const wrap = document.createElement("div");
-      wrap.className = "swatch-wrap";
-      const sw = document.createElement("div");
-      sw.className = "swatch" + (selectedColor === color.id ? " selected" : "");
-      sw.style.background = color.hex;
-      sw.addEventListener("click", () => {
-        selectedColor = color.id;
-        renderColors();
-        updateAddState();
-      });
-      const label = document.createElement("div");
-      label.className = "swatch-label";
-      label.textContent = color.name;
-      wrap.appendChild(sw);
-      wrap.appendChild(label);
-      colorsEl.appendChild(wrap);
-    });
-  }
-
-  function updateAddState(){
-    const ready = selectedItem && selectedColor;
-    addBtn.disabled = !ready;
-    pickHint.style.display = ready ? "none" : "block";
-  }
-
-  addBtn.addEventListener("click", () => {
-    const item = CATALOG.find(i => i.id === selectedItem);
-    const color = COLORS.find(c => c.id === selectedColor);
-    cart.push({ item, color });
-    selectedItem = null;
-    selectedColor = null;
-    renderGrid();
-    renderColors();
-    updateAddState();
-    renderCart();
-    showToast(`Added ${item.name} in ${color.name}!`);
-  });
 
   function renderCart(){
     cartEl.innerHTML = "";
@@ -463,8 +467,6 @@
   sendBtn.addEventListener("click", sendOrder);
 
   renderGrid();
-  renderColors();
-  updateAddState();
   renderCart();
 </script>
 
