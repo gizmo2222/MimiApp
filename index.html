@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#7c5cff">
 <title>Mimi's 3D Print Shop</title>
 <style>
@@ -215,7 +215,21 @@
     padding:12px 16px calc(12px + env(safe-area-inset-bottom));
     display:flex;
     justify-content:center;
+    gap:10px;
   }
+  .new-order-btn{
+    flex-shrink:0;
+    background:white;
+    color:var(--purple);
+    border:3px solid var(--purple);
+    border-radius:999px;
+    padding:0 18px;
+    font-size:0.95rem;
+    font-weight:800;
+    min-height:52px;
+    cursor:pointer;
+  }
+  .new-order-btn[hidden]{ display:none; }
   .send-btn{
     width:100%;
     max-width:420px;
@@ -280,6 +294,7 @@
 </main>
 
 <div class="send-bar">
+  <button id="newOrderBtn" class="new-order-btn" type="button" hidden>Start New Order</button>
   <button id="sendBtn" class="send-btn" disabled>Send Order to Mimi 🚀</button>
 </div>
 
@@ -329,6 +344,7 @@
   const sendBtn = document.getElementById("sendBtn");
   const noteEl = document.getElementById("note");
   const toastEl = document.getElementById("toast");
+  const newOrderBtn = document.getElementById("newOrderBtn");
 
   function renderGrid(){
     gridEl.innerHTML = "";
@@ -357,7 +373,8 @@
         const swatch = document.createElement("button");
         swatch.type = "button";
         swatch.className = "swatch-btn" + (selectedColorId === color.id ? " selected" : "");
-        swatch.setAttribute("aria-label", color.name);
+        swatch.setAttribute("aria-label", `${color.name} ${item.name}`);
+        swatch.setAttribute("aria-pressed", selectedColorId === color.id ? "true" : "false");
         swatch.innerHTML = `<span class="dot" style="background:${color.hex}"></span>`;
         swatch.addEventListener("click", () => {
           cardColorSelection[item.id] = color.id;
@@ -390,6 +407,7 @@
   }
 
   function renderCart(){
+    newOrderBtn.hidden = true;
     cartEl.innerHTML = "";
     if (cart.length === 0){
       cartEl.appendChild(cartEmpty);
@@ -407,6 +425,7 @@
       const removeBtn = document.createElement("button");
       removeBtn.className = "remove-btn";
       removeBtn.textContent = "✕";
+      removeBtn.setAttribute("aria-label", `Remove ${entry.item.name} (${entry.color.name})`);
       removeBtn.addEventListener("click", () => {
         cart.splice(idx, 1);
         renderCart();
@@ -440,31 +459,50 @@
     if (navigator.share){
       try {
         await navigator.share({ title: "3D Print Order", text });
+        orderSent("Order sent! 🎉");
         return;
       } catch (err) {
-        // user cancelled or share failed — fall through to next option
+        // Closing the share sheet is a choice, not a failure: keep everything as it is
+        if (err.name === "AbortError") return;
+        // Sharing really failed — fall through to the next option
       }
     }
 
     if (MIMI.phone){
+      orderSent();
       window.location.href = `sms:${MIMI.phone}?&body=${encodeURIComponent(text)}`;
       return;
     }
 
     if (MIMI.email){
+      orderSent();
       window.location.href = `mailto:${MIMI.email}?subject=${encodeURIComponent("3D Print Order")}&body=${encodeURIComponent(text)}`;
       return;
     }
 
     try {
       await navigator.clipboard.writeText(text);
-      showToast("Copied! Paste it into a text or email to " + MIMI.name + ".", 3500);
+      orderSent("Copied! Paste it into a text or email to " + MIMI.name + ".", 3500);
     } catch (err) {
       showToast("Couldn't share automatically — copy the list and send it yourself!", 3500);
     }
   }
 
+  // After an order goes out, offer a fresh list so it isn't sent twice by accident
+  function orderSent(message, duration){
+    if (message) showToast(message, duration);
+    newOrderBtn.hidden = false;
+  }
+
+  function startNewOrder(){
+    cart = [];
+    noteEl.value = "";
+    renderCart();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   sendBtn.addEventListener("click", sendOrder);
+  newOrderBtn.addEventListener("click", startNewOrder);
 
   renderGrid();
   renderCart();
