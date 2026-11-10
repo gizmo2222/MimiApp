@@ -4,10 +4,10 @@ Parked here for now. Move to a dedicated games repo later.
 
 Each idea starts from a game the user likes. The plan is to make original games with similar mechanics, using our own names, art and setting rather than cloning these titles.
 
-## 1. Inspired by *Dominion* (2008 deckbuilding card game)
-- Core loop: everyone starts with the same small deck, buys cards from a shared market, and the deck grows over the game.
-- Key mechanics: action / treasure / victory card types, a random set of market cards each game (high replayability), and victory cards that clog your deck.
-- Open questions: solo vs. multiplayer? digital or physical? theme?
+## 1. Inspired by *Ultimate Domain* (1993–94 PC strategy game; released in Europe as *Genesia*)
+- Core loop: a medieval kingdom builder where you settle new land, grow villages, and expand your territory against rival lords.
+- Key mechanics: villages that grow on their own, a production chain (farms, mines, workshops), research and inventions, and a mix of trade and conflict with neighbors.
+- Open questions: real-time or turn-based? how much combat vs. economy? map size and number of rivals?
 
 ## 2. Inspired by *Black & White* (2001 god game)
 - Core loop: you play a god who wins villagers' belief and grows a pet creature that learns from how you reward and punish it.
