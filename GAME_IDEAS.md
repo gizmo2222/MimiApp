@@ -19,6 +19,11 @@ Each idea starts from a game the user likes. The plan is to make original games 
 - Key mechanics: manage workers by picking them up, a resource chain (wood, stone, wool, and so on), and modular building blueprints.
 - Open questions: platform? co-op? how much of a story or quest structure?
 
+## 4. Inspired by *Katamari Damacy* (2004 PlayStation 2 game)
+- Core loop: roll a sticky ball around a level, picking up objects so the ball grows, letting you pick up bigger and bigger things — from thumbtacks to buildings.
+- Key mechanics: grow-to-unlock (size decides what you can grab and where you can go), a time limit, physics-based rolling, and a playful, absurd tone.
+- Open questions: our own theme and reason for rolling? 3D scope? levels vs. one big open world?
+
 ## Next steps
 - [ ] Pick one to prototype first
 - [ ] Create a separate repo for game projects
